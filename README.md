@@ -1,1 +1,1 @@
-# studymind
+# StudyMind
