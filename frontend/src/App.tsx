@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
+
 type HealthResponse = {
   status: string
   db: 'ok' | 'error'
 }
+
 const apiUrl = import.meta.env.VITE_API_URL
+
 function App() {
   const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking')
 
