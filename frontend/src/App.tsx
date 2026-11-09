@@ -6,7 +6,7 @@ type HealthResponse = {
 const apiUrl = import.meta.env.VITE_API_URL
 function App() {
   const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking')
-  
+
   useEffect(() => {
     fetch(`${apiUrl}/health`)
       .then((response) => response.json() as Promise<HealthResponse>)
