@@ -42,6 +42,9 @@ On a fixed test set of 30 questions, at least 80% are answered
 correctly with the right source (measured by an evaluation script).
 
 ## Architecture
-Next.js frontend → FastAPI backend → PostgreSQL + pgvector,
+React frontend (Vite, TypeScript) → FastAPI backend → PostgreSQL + pgvector,
 with the Gemini API for embeddings and answers.
 All services run as Docker containers.
+
+See `docs/adr/` for the reasons behind these choices
+(001: monorepo, 002: React with Vite instead of Next.js).

@@ -9,6 +9,9 @@ change both parts at the same time (for example a new field in the API
 and in the UI). We needed to decide whether to keep them in one
 repository or in separate ones.
 
+*Note: the frontend was later changed to React with Vite (see ADR 002).
+This decision (monorepo) is not affected.*
+
 ## Decision
 Frontend, backend, documentation and Docker configuration live in one
 repository, in the folders frontend/, backend/ and docs/.
