@@ -20,6 +20,13 @@ All commands run from the `backend/` folder.
 uv sync
 ```
 
+### Start the database
+From the project root:
+```bash
+cp .env.example .env   # first time only, then set your own password
+docker compose up -d db
+```
+
 ### Run the app
 ```bash
 uv run fastapi dev src/backend/main.py
@@ -38,9 +45,3 @@ uv run ruff format --check
 Health endpoint with database check (see #3, #4).
 
 
-### Start the database
-From the project root:
-```bash
-cp .env.example .env   # first time only, then set your own password
-docker compose up -d db
-```
