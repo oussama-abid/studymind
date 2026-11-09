@@ -10,8 +10,6 @@ uploaded material (RAG).
 - Gemini API for embeddings and answers
 - pytest and Ruff for tests and linting
 
-## Status
-Not set up yet (see SM-3).
 
 ## Development
 
@@ -37,4 +35,12 @@ uv run ruff format --check
 ```
 
 ## Status
-Basic app with a health endpoint (see #3).
+Health endpoint with database check (see #3, #4).
+
+
+### Start the database
+From the project root:
+```bash
+cp .env.example .env   # first time only, then set your own password
+docker compose up -d db
+```
