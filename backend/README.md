@@ -12,3 +12,29 @@ uploaded material (RAG).
 
 ## Status
 Not set up yet (see SM-3).
+
+## Development
+
+All commands run from the `backend/` folder.
+
+### Install dependencies
+```bash
+uv sync
+```
+
+### Run the app
+```bash
+uv run fastapi dev src/backend/main.py
+```
+- Health check: http://localhost:8000/health
+- API docs: http://localhost:8000/docs
+
+### Run tests and checks
+```bash
+uv run pytest
+uv run ruff check
+uv run ruff format --check
+```
+
+## Status
+Basic app with a health endpoint (see #3).
