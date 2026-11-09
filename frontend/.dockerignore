@@ -1,0 +1,9 @@
+# Installed packages: the image runs its own npm ci
+node_modules
+
+# Build output: the image builds its own
+dist
+
+# Secrets
+.env
+.env.local

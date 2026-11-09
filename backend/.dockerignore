@@ -1,0 +1,14 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+
+# Not needed in production
+tests/
+
+# Secrets
+.env
