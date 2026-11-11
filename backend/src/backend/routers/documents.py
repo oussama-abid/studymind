@@ -6,9 +6,9 @@ from sqlalchemy import select
 from backend.config import settings
 from backend.database import SessionDep
 from backend.models import Document
+from backend.processing import process_document
 from backend.routers.courses import get_course_or_404
 from backend.schemas.documents import DocumentRead
-from backend.processing import process_document
 
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # 20 MB
 
