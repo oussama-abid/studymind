@@ -26,6 +26,17 @@ From the project root:
 cp .env.example .env   # first time only, then set your own password
 docker compose up -d db
 ```
+### Run database migrations
+After starting the database, create or update the tables:
+```bash
+uv run alembic upgrade head
+```
+
+After changing a model, create a new migration and **review it before running it**:
+```bash
+uv run alembic revision --autogenerate -m "short description"
+uv run alembic upgrade head
+```
 
 ### Run the app
 ```bash
