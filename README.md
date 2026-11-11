@@ -1,4 +1,5 @@
 # StudyMind
+![CI](https://github.com/oussama-abid/studymind/actions/workflows/ci.yml/badge.svg)
 
 An AI study assistant that answers questions, summarizes and quizzes
 students using only their own course material, always with sources.
