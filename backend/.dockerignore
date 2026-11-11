@@ -12,3 +12,6 @@ tests/
 
 # Secrets
 .env
+
+# Uploaded files
+uploads/
