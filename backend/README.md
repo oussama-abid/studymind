@@ -52,6 +52,9 @@ uv run ruff check
 uv run ruff format --check
 ```
 
+The course tests start a temporary PostgreSQL with Testcontainers,
+so Docker must be running.
+
 ## Status
 Health endpoint with database check (see #3, #4).
 
