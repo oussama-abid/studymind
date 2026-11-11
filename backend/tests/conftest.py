@@ -4,10 +4,10 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from testcontainers.community.postgres import PostgresContainer
 
+from backend.config import settings
 from backend.database import get_db
 from backend.main import app
 from backend.models import Base
-from backend.config import settings
 
 
 @pytest.fixture(scope="session")

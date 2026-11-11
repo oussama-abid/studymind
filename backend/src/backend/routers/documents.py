@@ -1,11 +1,11 @@
 from pathlib import Path
-from sqlalchemy import select
 
 from fastapi import APIRouter, HTTPException, UploadFile
+from sqlalchemy import select
 
 from backend.config import settings
 from backend.database import SessionDep
-from backend.models import Document, Course
+from backend.models import Document
 from backend.routers.courses import get_course_or_404
 from backend.schemas.documents import DocumentRead
 
