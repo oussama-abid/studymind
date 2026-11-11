@@ -53,3 +53,47 @@ def client(engine):
 def upload_dir(tmp_path, monkeypatch):
     monkeypatch.setattr(settings, "upload_dir", str(tmp_path))
     return tmp_path
+
+
+def build_pdf(pages: list[str]) -> bytes:
+    """Build a small, valid PDF with one line of text per page."""
+    count = len(pages)
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids ["
+        + b" ".join(f"{4 + 2 * i} 0 R".encode() for i in range(count))
+        + f"] /Count {count} >>".encode(),
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    for i, page_text in enumerate(pages):
+        content_id = 5 + 2 * i
+        objects.append(
+            f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+            f"/Resources << /Font << /F1 3 0 R >> >> "
+            f"/Contents {content_id} 0 R >>".encode()
+        )
+        stream = (
+            f"BT /F1 12 Tf 72 720 Td ({page_text}) Tj ET".encode() if page_text else b""
+        )
+        objects.append(
+            f"<< /Length {len(stream)} >>\nstream\n".encode() + stream + b"\nendstream"
+        )
+
+    pdf = b"%PDF-1.4\n"
+    offsets = []
+    for number, body in enumerate(objects, start=1):
+        offsets.append(len(pdf))
+        pdf += f"{number} 0 obj\n".encode() + body + b"\nendobj\n"
+    xref_start = len(pdf)
+    pdf += f"xref\n0 {len(objects) + 1}\n0000000000 65535 f \n".encode()
+    pdf += b"".join(f"{offset:010d} 00000 n \n".encode() for offset in offsets)
+    pdf += (
+        f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\n"
+        f"startxref\n{xref_start}\n%%EOF\n"
+    ).encode()
+    return pdf
+
+
+@pytest.fixture
+def make_pdf():
+    return build_pdf
