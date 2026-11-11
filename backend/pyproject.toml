@@ -13,6 +13,7 @@ dependencies = [
     "pgvector>=0.5.1",
     "psycopg[binary]>=3.3.8",
     "pydantic-settings>=2.16.2",
+    "pypdf>=7.0.1",
     "sqlalchemy>=2.1.8",
 ]
 
