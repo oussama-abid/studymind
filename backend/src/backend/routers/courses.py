@@ -27,7 +27,9 @@ def create_course(data: CourseCreate, db: SessionDep):
 
 @router.get("", response_model=list[CourseRead])
 def list_courses(db: SessionDep):
-    return db.scalars(select(Course).order_by(Course.created_at.desc(), Course.id.desc())).all()
+    return db.scalars(
+        select(Course).order_by(Course.created_at.desc(), Course.id.desc())
+    ).all()
 
 
 @router.get("/{course_id}", response_model=CourseRead)
