@@ -1,9 +1,23 @@
+from collections.abc import Iterator
+from typing import Annotated
+
+from fastapi import Depends
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.config import settings
 
 engine = create_engine(settings.database_url)
+SessionLocal = sessionmaker(bind=engine)
+
+
+def get_db() -> Iterator[Session]:
+    with SessionLocal() as session:
+        yield session
+
+
+SessionDep = Annotated[Session, Depends(get_db)]
 
 
 def check_database() -> bool:
