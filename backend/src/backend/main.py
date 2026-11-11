@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import settings
 from backend.database import check_database
-from backend.routers import courses
+from backend.routers import courses, documents
 
 app = FastAPI()
 app.add_middleware(
@@ -14,6 +14,7 @@ app.add_middleware(
 )
 
 app.include_router(courses.router)
+app.include_router(documents.router)
 
 
 @app.get("/health")
