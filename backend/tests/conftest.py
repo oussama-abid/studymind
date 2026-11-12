@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 from testcontainers.community.postgres import PostgresContainer
 
 from backend.core.config import settings
@@ -44,6 +44,18 @@ def client(engine):
 
     # 5. After each test: undo the override and empty all tables
     app.dependency_overrides.clear()
+    empty_tables(engine)
+
+
+@pytest.fixture
+def db(engine):
+    """A database session for tests that use services directly, without the API."""
+    with Session(engine) as session:
+        yield session
+    empty_tables(engine)
+
+
+def empty_tables(engine):
     with engine.begin() as connection:
         connection.execute(
             text("TRUNCATE courses, documents, chunks RESTART IDENTITY CASCADE")
