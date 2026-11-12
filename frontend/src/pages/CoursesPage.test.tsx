@@ -52,17 +52,22 @@ test('shows an error when the backend fails', async () => {
 })
 
 test('creates a new course', async () => {
-    mockCourses([])
-    renderPage()
-    expect(await screen.findByText('No courses yet. Create your first one!')).toBeInTheDocument()
-    
-    fireEvent.click(screen.getByRole('button', { name: '+ New course' }))
-    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Databases' } })
-    fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'SQL basics' } })
-    mockCourses({ id: 1, title: 'Databases', description: 'SQL basics', created_at: '', updated_at: '' })
-    fireEvent.click(screen.getByRole('button', { name: 'Create' })) 
-    expect(await screen.findByText('Databases')).toBeInTheDocument()
-    expect(screen.getByText('SQL basics')).toBeInTheDocument()
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  mockCourses([])
+  renderPage()
+  expect(await screen.findByText('No courses yet. Create your first one!')).toBeInTheDocument()
+
+  fireEvent.click(screen.getByRole('button', { name: '+ New course' }))
+  fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Databases' } })
+  fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'SQL basics' } })
+  mockCourses({
+    id: 1,
+    title: 'Databases',
+    description: 'SQL basics',
+    created_at: '',
+    updated_at: '',
+  })
+  fireEvent.click(screen.getByRole('button', { name: 'Create' }))
+  expect(await screen.findByText('Databases')).toBeInTheDocument()
+  expect(screen.getByText('SQL basics')).toBeInTheDocument()
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 })
-    

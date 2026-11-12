@@ -1,17 +1,16 @@
 const apiUrl = import.meta.env.VITE_API_URL
 
-
 export type Course = {
-    id: number,
-    title: string,
-    description: string | null,
-    created_at: string,
-    updated_at: string
+  id: number
+  title: string
+  description: string | null
+  created_at: string
+  updated_at: string
 }
 
 export type CourseCreate = {
-    title: string,
-    description?: string
+  title: string
+  description?: string
 }
 
 export async function fetchCourses(): Promise<Course[]> {
