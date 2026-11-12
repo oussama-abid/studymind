@@ -1,40 +1,38 @@
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router'
 import { afterEach, expect, test, vi } from 'vitest'
 
 import App from './App'
 
-// After each test, put the real fetch back
 afterEach(() => {
   vi.restoreAllMocks()
 })
 
-function mockBackendResponse(body: object) {
-  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-    new Response(JSON.stringify(body)),
+test('shows the app title and the courses page on /', async () => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async () => new Response(JSON.stringify([])))
+  render(
+    <MemoryRouter initialEntries={['/']}>
+      <App />
+    </MemoryRouter>,
   )
-}
-
-test('shows the app title', () => {
-  mockBackendResponse({ status: 'ok', db: 'ok' })
-  render(<App />)
   expect(screen.getByText('StudyMind')).toBeInTheDocument()
+  expect(await screen.findByText('My courses')).toBeInTheDocument()
 })
 
-test('shows online when the backend is up', async () => {
-  mockBackendResponse({ status: 'ok', db: 'ok' })
-  render(<App />)
-  expect(await screen.findByText('online')).toBeInTheDocument()
+test('shows the course page on /courses/:courseId', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+    async () =>
+      new Response(
+        JSON.stringify({ id: 1, title: 'Databases', description: 'SQL basics', created_at: '', updated_at: '' }),
+      ),
+  )
+  render(
+    <MemoryRouter initialEntries={['/courses/1']}>
+      <App />
+    </MemoryRouter>,
+  )
+    expect(screen.getByText('← All courses')).toBeInTheDocument()
+  expect(await screen.findByText('Databases')).toBeInTheDocument()
 })
 
-test('shows offline when the backend reports an error', async () => {
-  mockBackendResponse({ status: 'error', db: 'error' })
-  render(<App />)
-  expect(await screen.findByText('offline')).toBeInTheDocument()
-})
 
-test('shows offline when the backend is unreachable', async () => {
-  vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'))
-  vi.spyOn(console, 'error').mockImplementation(() => {})
-  render(<App />)
-  expect(await screen.findByText('offline')).toBeInTheDocument()
-})

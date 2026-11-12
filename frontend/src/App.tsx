@@ -1,40 +1,24 @@
-import { useEffect, useState } from 'react'
+import { Link, Route, Routes } from 'react-router'
 
-type HealthResponse = {
-  status: string
-  db: 'ok' | 'error'
-}
+import BackendStatus from './components/BackendStatus'
 
-const apiUrl = import.meta.env.VITE_API_URL
-
+import CoursePage from './pages/CoursePage'
+import CoursesPage from './pages/CoursesPage'
 function App() {
-  const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking')
-
-  useEffect(() => {
-    fetch(`${apiUrl}/health`)
-      .then((response) => response.json() as Promise<HealthResponse>)
-      .then((data) => setStatus(data.status === 'ok' ? 'online' : 'offline'))
-      .catch((error) => {
-        console.error('Error fetching backend status:', error)
-        setStatus('offline')
-      })
-  }, [])
-
-  const colors = {
-    checking: 'text-gray-500',
-    online: 'text-green-600',
-    offline: 'text-red-600',
-  }
-
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="flex flex-col items-center gap-4 rounded-lg bg-white p-6 shadow-md">
-        <h1 className="text-xl font-bold text-blue-600">StudyMind</h1>
-        <p>
-          Backend: <span className={colors[status]}>{status}</span>
-        </p>
-      </div>
-    </main>
+    <div className="min-h-screen bg-gray-100">
+      <header className="flex items-center justify-between bg-white px-6 py-3 shadow">
+        <Link to="/" className="text-xl font-bold text-blue-600">
+          StudyMind
+        </Link>
+        <BackendStatus />
+      </header>
+
+      <Routes>
+        <Route path="/" element={<CoursesPage />} />
+        <Route path="/courses/:courseId" element={<CoursePage />} />
+      </Routes>
+    </div>
   )
 }
 
