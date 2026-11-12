@@ -5,6 +5,8 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy import ForeignKey, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+EMBEDDING_DIMENSIONS = 768
+
 
 class DocumentStatus(enum.StrEnum):
     PROCESSING = "processing"
@@ -53,7 +55,7 @@ class Chunk(Base):
     chunk_index: Mapped[int]
     page_number: Mapped[int]
     content: Mapped[str] = mapped_column(Text)
-    embedding: Mapped[list[float] | None] = mapped_column(Vector(768))
+    embedding: Mapped[list[float] | None] = mapped_column(Vector(EMBEDDING_DIMENSIONS))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), onupdate=func.now()
