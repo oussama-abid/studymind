@@ -1,7 +1,7 @@
 from google import genai
 from google.genai import types
 
-from backend.config import settings
+from backend.core.config import settings
 from backend.models import EMBEDDING_DIMENSIONS
 
 MODEL = "gemini-embedding-001"

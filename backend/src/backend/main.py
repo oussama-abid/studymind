@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.config import settings
-from backend.database import check_database
+from backend.core.config import settings
+from backend.core.database import check_database
 from backend.routers import courses, documents
 
 app = FastAPI()

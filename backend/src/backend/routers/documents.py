@@ -3,12 +3,12 @@ from pathlib import Path
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
 from sqlalchemy import select
 
-from backend.config import settings
-from backend.database import SessionDep, SessionFactoryDep
+from backend.core.config import settings
+from backend.core.database import SessionDep, SessionFactoryDep
 from backend.models import Document
-from backend.processing import process_document_in_background
 from backend.routers.courses import get_course_or_404
 from backend.schemas.documents import DocumentRead
+from backend.services.processing import process_document_in_background
 
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # 20 MB
 

@@ -94,7 +94,7 @@ def test_upload_fails_when_embedding_fails(client, engine, make_pdf, monkeypatch
     def broken_embed_texts(texts):
         raise ServerError(503, {"error": {"message": "Service unavailable"}})
 
-    monkeypatch.setattr("backend.processing.embed_texts", broken_embed_texts)
+    monkeypatch.setattr("backend.services.processing.embed_texts", broken_embed_texts)
     course_id = create_course(client)
 
     upload(client, course_id, make_pdf(["Docker runs containers."]))
@@ -111,7 +111,7 @@ def test_unexpected_error_marks_document_failed(client, make_pdf, monkeypatch):
     def crashing_embed_texts(texts):
         raise RuntimeError("bug in our code")
 
-    monkeypatch.setattr("backend.processing.embed_texts", crashing_embed_texts)
+    monkeypatch.setattr("backend.services.processing.embed_texts", crashing_embed_texts)
     course_id = create_course(client)
 
     upload(client, course_id, make_pdf(["Docker runs containers."]))
