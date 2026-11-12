@@ -1,3 +1,5 @@
+from typing import Literal
+
 from google import genai
 from google.genai import types
 
@@ -7,8 +9,13 @@ from backend.models import EMBEDDING_DIMENSIONS
 MODEL = "gemini-embedding-001"
 BATCH_SIZE = 100
 
+TaskType = Literal["RETRIEVAL_DOCUMENT", "RETRIEVAL_QUERY"]
 
-def embed_texts(texts: list[str]) -> list[list[float]]:
+
+def embed_texts(
+    texts: list[str],
+    task_type: TaskType = "RETRIEVAL_DOCUMENT",
+) -> list[list[float]]:
     """Turn each text into a vector of 768 numbers, in the same order."""
     client = genai.Client(
         api_key=settings.gemini_api_key,
@@ -29,7 +36,7 @@ def embed_texts(texts: list[str]) -> list[list[float]]:
             model=MODEL,
             contents=batch,
             config=types.EmbedContentConfig(
-                task_type="RETRIEVAL_DOCUMENT",
+                task_type=task_type,
                 output_dimensionality=EMBEDDING_DIMENSIONS,
             ),
         )
