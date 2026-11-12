@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
-from backend.config import settings
+from backend.core.config import settings
 
 engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(bind=engine)

@@ -1,4 +1,4 @@
-from backend.pdf import extract_pages
+from backend.services.pdf import extract_pages
 
 
 def test_extract_pages_returns_text_per_page(tmp_path, make_pdf):

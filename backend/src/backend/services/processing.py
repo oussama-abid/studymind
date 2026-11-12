@@ -4,10 +4,10 @@ from google.genai.errors import APIError
 from pypdf.errors import PdfReadError
 from sqlalchemy.orm import Session, sessionmaker
 
-from backend.chunking import chunk_text
-from backend.embeddings import embed_texts
 from backend.models import Chunk, Document, DocumentStatus
-from backend.pdf import extract_pages
+from backend.services.chunking import chunk_text
+from backend.services.embeddings import embed_texts
+from backend.services.pdf import extract_pages
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,4 @@
-from backend.chunking import chunk_text
+from backend.services.chunking import chunk_text
 
 TEXT = "Docker runs containers. Images are templates. Volumes keep data."
 

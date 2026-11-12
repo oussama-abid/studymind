@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from backend.database import SessionDep
+from backend.core.database import SessionDep
 from backend.models import Course
 from backend.schemas.courses import CourseCreate, CourseRead
 

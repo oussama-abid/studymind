@@ -4,8 +4,8 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from testcontainers.community.postgres import PostgresContainer
 
-from backend.config import settings
-from backend.database import get_db, get_session_factory
+from backend.core.config import settings
+from backend.core.database import get_db, get_session_factory
 from backend.main import app
 from backend.models import EMBEDDING_DIMENSIONS, Base
 
@@ -107,4 +107,4 @@ def fake_embed_texts(texts: list[str]) -> list[list[float]]:
 
 @pytest.fixture(autouse=True)
 def fake_embeddings(monkeypatch):
-    monkeypatch.setattr("backend.processing.embed_texts", fake_embed_texts)
+    monkeypatch.setattr("backend.services.processing.embed_texts", fake_embed_texts)
