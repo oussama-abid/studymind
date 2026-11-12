@@ -22,7 +22,13 @@ function renderAt(url: string) {
 test('shows the course from the URL', async () => {
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
     new Response(
-      JSON.stringify({ id: 1, title: 'Databases', description: null, created_at: '', updated_at: '' }),
+      JSON.stringify({
+        id: 1,
+        title: 'Databases',
+        description: null,
+        created_at: '',
+        updated_at: '',
+      }),
     ),
   )
   renderAt('/courses/1')

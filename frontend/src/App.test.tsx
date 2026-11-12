@@ -20,10 +20,16 @@ test('shows the app title and the courses page on /', async () => {
 })
 
 test('shows the course page on /courses/:courseId', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation(
+  vi.spyOn(globalThis, 'fetch').mockImplementation(
     async () =>
       new Response(
-        JSON.stringify({ id: 1, title: 'Databases', description: 'SQL basics', created_at: '', updated_at: '' }),
+        JSON.stringify({
+          id: 1,
+          title: 'Databases',
+          description: 'SQL basics',
+          created_at: '',
+          updated_at: '',
+        }),
       ),
   )
   render(
@@ -31,8 +37,6 @@ test('shows the course page on /courses/:courseId', async () => {
       <App />
     </MemoryRouter>,
   )
-    expect(screen.getByText('← All courses')).toBeInTheDocument()
+  expect(screen.getByText('← All courses')).toBeInTheDocument()
   expect(await screen.findByText('Databases')).toBeInTheDocument()
 })
-
-
