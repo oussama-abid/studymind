@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { type Course, fetchCourse } from '../api/courses'
-
+import DocumentsSection from '../components/DocumentsSection'
 function CoursePage() {
   const { courseId } = useParams()
   const [course, setCourse] = useState<Course | null>(null)
@@ -34,7 +34,7 @@ function CoursePage() {
         <>
           <h1 className="mt-4 text-2xl font-bold text-blue-600">{course.title}</h1>
           {course.description && <p className="mt-2 text-gray-600">{course.description}</p>}
-          <p className="mt-6 text-gray-500">Documents will appear here soon.</p>
+          <DocumentsSection courseId={course.id} />
         </>
       )}
     </main>
