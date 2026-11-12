@@ -1,12 +1,12 @@
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
 from sqlalchemy import select
 
 from backend.config import settings
-from backend.database import SessionDep
+from backend.database import SessionDep, SessionFactoryDep
 from backend.models import Document
-from backend.processing import process_document
+from backend.processing import process_document_in_background
 from backend.routers.courses import get_course_or_404
 from backend.schemas.documents import DocumentRead
 
@@ -26,7 +26,13 @@ def validate_pdf(content: bytes) -> None:
 
 
 @router.post("", status_code=201, response_model=DocumentRead)
-def upload_document(course_id: int, file: UploadFile, db: SessionDep):
+def upload_document(
+    course_id: int,
+    file: UploadFile,
+    db: SessionDep,
+    background_tasks: BackgroundTasks,
+    session_factory: SessionFactoryDep,
+):
     # 1. Check the course exists (404 otherwise)
     get_course_or_404(db, course_id)
 
@@ -53,8 +59,10 @@ def upload_document(course_id: int, file: UploadFile, db: SessionDep):
     document.path = str(file_path)
     db.commit()
 
-    # 6. Extract the text and create the chunks
-    process_document(db, document)
+    # 6. Process the PDF after the response is sent (chunks + embeddings)
+    background_tasks.add_task(
+        process_document_in_background, session_factory, document.id
+    )
 
     db.refresh(document)
     return document

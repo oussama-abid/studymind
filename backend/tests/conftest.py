@@ -5,9 +5,9 @@ from sqlalchemy.orm import sessionmaker
 from testcontainers.community.postgres import PostgresContainer
 
 from backend.config import settings
-from backend.database import get_db
+from backend.database import get_db, get_session_factory
 from backend.main import app
-from backend.models import Base
+from backend.models import EMBEDDING_DIMENSIONS, Base
 
 
 @pytest.fixture(scope="session")
@@ -37,6 +37,7 @@ def client(engine):
             yield session
 
     app.dependency_overrides[get_db] = get_test_db
+    app.dependency_overrides[get_session_factory] = lambda: TestSession
 
     with TestClient(app) as test_client:
         yield test_client
@@ -97,3 +98,13 @@ def build_pdf(pages: list[str]) -> bytes:
 @pytest.fixture
 def make_pdf():
     return build_pdf
+
+
+def fake_embed_texts(texts: list[str]) -> list[list[float]]:
+    """Stand-in for Gemini: one fake vector per text, no network call."""
+    return [[0.1] * EMBEDDING_DIMENSIONS for _ in texts]
+
+
+@pytest.fixture(autouse=True)
+def fake_embeddings(monkeypatch):
+    monkeypatch.setattr("backend.processing.embed_texts", fake_embed_texts)

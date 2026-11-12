@@ -20,6 +20,13 @@ def get_db() -> Iterator[Session]:
 SessionDep = Annotated[Session, Depends(get_db)]
 
 
+def get_session_factory() -> sessionmaker[Session]:
+    return SessionLocal
+
+
+SessionFactoryDep = Annotated[sessionmaker[Session], Depends(get_session_factory)]
+
+
 def check_database() -> bool:
     try:
         with engine.connect() as connection:

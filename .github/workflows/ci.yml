@@ -12,6 +12,7 @@ jobs:
     env:
       DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/test
       CORS_ORIGINS: '["http://localhost:5173"]'
+      GEMINI_API_KEY: fake-gemini-key-for-testing
     defaults:
       run:
         working-directory: backend
