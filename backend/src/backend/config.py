@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     database_url: str
     cors_origins: list[str]
     upload_dir: str = "uploads"
+    gemini_api_key: str
     model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
 
 
