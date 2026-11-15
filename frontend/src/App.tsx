@@ -1,14 +1,14 @@
 import { Link, Route, Routes } from 'react-router'
 
 import BackendStatus from './components/BackendStatus'
-
 import CoursePage from './pages/CoursePage'
 import CoursesPage from './pages/CoursesPage'
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="flex items-center justify-between bg-white px-6 py-3 shadow">
-        <Link to="/" className="text-xl font-bold text-blue-600">
+    <div className="min-h-screen bg-paper text-ink">
+      <header className="flex items-center justify-between border-b border-line bg-white px-8 py-4">
+        <Link to="/" className="font-display text-2xl font-extrabold tracking-tight">
           StudyMind
         </Link>
         <BackendStatus />

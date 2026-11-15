@@ -1,3 +1,5 @@
+import { errorMessage } from './errors'
+
 const apiUrl = import.meta.env.VITE_API_URL
 
 export type CourseDocument = {
@@ -18,7 +20,7 @@ export type DocumentCreate = {
 export async function fetchDocuments(courseId: number): Promise<CourseDocument[]> {
   const response = await fetch(`${apiUrl}/courses/${courseId}/documents`)
   if (!response.ok) {
-    throw new Error(`Error fetching documents for course ${courseId}: ${response.status}`)
+    throw new Error(await errorMessage(response, `Upload failed (error ${response.status})`))
   }
   return (await response.json()) as CourseDocument[]
 }
