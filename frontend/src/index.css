@@ -1,1 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap');
 @import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+/* StudyMind "Highlighter": printed lecture notes + a highlighter pen */
+@theme {
+  --font-sans: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+
+  --color-paper: #f3f5f7; /* page background */
+  --color-ink: #1c2433; /* text, user messages */
+  --color-muted: #5a6474; /* secondary text */
+  --color-line: #dde2e8; /* borders, dividers */
+  --color-action: #1f4fd1; /* buttons and links */
+  --color-marker: #ffe45c; /* the highlighter */
+}
+
+@layer components {
+  .btn {
+    @apply min-h-11 rounded-lg bg-action px-5 py-2 font-bold text-white hover:bg-ink disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply min-h-11 rounded-lg border-2 border-ink bg-white px-4 py-2 font-bold text-ink hover:bg-paper;
+  }
+  .card {
+    @apply rounded-xl border border-line bg-white p-5;
+  }
+  .input {
+    @apply rounded-lg border-2 border-ink bg-white px-3 py-2;
+  }
+  .page-title {
+    @apply font-display text-4xl font-extrabold tracking-tight text-ink;
+  }
+}
+
+/* The signature: important terms in answers look highlighted */
+.answer strong {
+  font-weight: 700;
+  background: linear-gradient(
+    transparent 40%,
+    var(--color-marker) 40%,
+    var(--color-marker) 90%,
+    transparent 90%
+  );
+  padding: 0 2px;
+}

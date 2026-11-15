@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { type Course, fetchCourse } from '../api/courses'
+import ChatSection from '../components/ChatSection'
 import DocumentsSection from '../components/DocumentsSection'
+
 function CoursePage() {
   const { courseId } = useParams()
   const [course, setCourse] = useState<Course | null>(null)
@@ -21,20 +23,23 @@ function CoursePage() {
   }, [courseId])
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <Link to="/" className="text-sm text-blue-600 hover:underline">
+    <main className="mx-auto max-w-6xl px-6 py-10">
+      <Link to="/" className="text-sm text-action hover:underline">
         ← All courses
       </Link>
 
-      {status === 'loading' && <p className="mt-4 text-gray-500">Loading course...</p>}
+      {status === 'loading' && <p className="mt-4 text-muted">Loading course...</p>}
 
       {status === 'error' && <p className="mt-4 text-red-600">Could not load this course.</p>}
 
       {status === 'ready' && course && (
         <>
-          <h1 className="mt-4 text-2xl font-bold text-blue-600">{course.title}</h1>
-          {course.description && <p className="mt-2 text-gray-600">{course.description}</p>}
-          <DocumentsSection courseId={course.id} />
+          <h1 className="page-title mt-3">{course.title}</h1>
+          {course.description && <p className="mt-2 text-lg text-muted">{course.description}</p>}
+          <div className="mt-10 grid gap-10 lg:grid-cols-[320px_1fr]">
+            <DocumentsSection courseId={course.id} />
+            <ChatSection courseId={course.id} />
+          </div>
         </>
       )}
     </main>

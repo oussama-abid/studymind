@@ -20,18 +20,20 @@ test('shows the app title and the courses page on /', async () => {
 })
 
 test('shows the course page on /courses/:courseId', async () => {
-  vi.spyOn(globalThis, 'fetch').mockImplementation(
-    async () =>
-      new Response(
-        JSON.stringify({
-          id: 1,
-          title: 'Databases',
-          description: 'SQL basics',
-          created_at: '',
-          updated_at: '',
-        }),
-      ),
-  )
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
+    if (String(url).endsWith('/documents')) {
+      return new Response(JSON.stringify([]))
+    }
+    return new Response(
+      JSON.stringify({
+        id: 1,
+        title: 'Databases',
+        description: 'SQL basics',
+        created_at: '',
+        updated_at: '',
+      }),
+    )
+  })
   render(
     <MemoryRouter initialEntries={['/courses/1']}>
       <App />

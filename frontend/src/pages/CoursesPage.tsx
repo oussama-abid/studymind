@@ -39,40 +39,31 @@ function CoursesPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-blue-600">My courses</h1>
-        <button
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-          className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
-        >
+    <main className="mx-auto max-w-3xl px-6 py-10">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="page-title">My courses</h1>
+        <button type="button" onClick={() => setIsModalOpen(true)} className="btn">
           + New course
         </button>
       </div>
 
-      {status === 'loading' && <p className="text-gray-500">Loading courses...</p>}
+      {status === 'loading' && <p className="text-muted">Loading courses...</p>}
 
       {status === 'error' && (
         <p className="text-red-600">Could not load your courses. Please try again later.</p>
       )}
 
       {status === 'ready' && courses.length === 0 && (
-        <p className="text-gray-500">No courses yet. Create your first one!</p>
+        <p className="text-muted">No courses yet. Create your first one!</p>
       )}
 
       {status === 'ready' && courses.length > 0 && (
         <ul className="flex flex-col gap-3">
           {courses.map((course) => (
             <li key={course.id}>
-              <Link
-                to={`/courses/${course.id}`}
-                className="block rounded-lg bg-white p-4 shadow hover:bg-blue-50"
-              >
-                <h2 className="font-semibold">{course.title}</h2>
-                {course.description && (
-                  <p className="text-sm text-gray-600">{course.description}</p>
-                )}
+              <Link to={`/courses/${course.id}`} className="card block hover:border-ink">
+                <h2 className="font-display text-xl font-bold">{course.title}</h2>
+                {course.description && <p className="mt-1 text-muted">{course.description}</p>}
               </Link>
             </li>
           ))}
@@ -80,14 +71,14 @@ function CoursesPage() {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-ink/50 p-4">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="new-course-title"
-            className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg"
+            className="card w-full max-w-md"
           >
-            <h2 id="new-course-title" className="mb-4 text-xl font-bold">
+            <h2 id="new-course-title" className="mb-4 font-display text-2xl font-bold">
               New course
             </h2>
             <form onSubmit={createNewCourse} className="flex flex-col gap-4">
@@ -100,7 +91,7 @@ function CoursesPage() {
                   required
                   maxLength={200}
                   autoFocus
-                  className="rounded border px-3 py-2"
+                  className="input"
                 />
               </label>
               <label className="flex flex-col gap-1">
@@ -110,21 +101,18 @@ function CoursesPage() {
                   placeholder="Description (optional)"
                   maxLength={500}
                   rows={3}
-                  className="rounded border px-3 py-2"
+                  className="input"
                 />
               </label>
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="rounded px-4 py-2 text-gray-600 hover:bg-gray-100"
+                  className="btn-secondary"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
-                >
+                <button type="submit" className="btn">
                   Create
                 </button>
               </div>

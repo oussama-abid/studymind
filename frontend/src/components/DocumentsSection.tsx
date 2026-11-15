@@ -65,32 +65,28 @@ function DocumentsSection({ courseId }: { courseId: number }) {
   }
 
   return (
-    <section className="mt-6">
+    <section className="self-start border-t-2 border-ink pt-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Documents</h2>
-        <button
-          type="button"
-          onClick={openModal}
-          className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
-        >
+        <h2 className="font-bold">Documents</h2>
+        <button type="button" onClick={openModal} className="btn-secondary">
           + Upload PDF
         </button>
       </div>
 
-      {status === 'loading' && <p className="text-gray-500">Loading documents...</p>}
+      {status === 'loading' && <p className="text-muted">Loading documents...</p>}
 
       {status === 'error' && (
         <p className="text-red-600">Could not load the documents. Please try again later.</p>
       )}
 
       {status === 'ready' && documents.length === 0 && (
-        <p className="text-gray-500">No documents yet. Upload your first PDF!</p>
+        <p className="text-muted">No documents yet. Upload your first PDF!</p>
       )}
 
       {status === 'ready' && documents.length > 0 && (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col">
           {documents.map((doc) => (
-            <li key={doc.id} className="rounded-lg bg-white p-4 shadow">
+            <li key={doc.id} className="border-b border-line py-3">
               <div className="flex items-center justify-between gap-4">
                 <p className="truncate font-semibold">{doc.filename}</p>
                 <span
@@ -108,14 +104,14 @@ function DocumentsSection({ courseId }: { courseId: number }) {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-ink/50 p-4">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="upload-title"
-            className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg"
+            className="card w-full max-w-md"
           >
-            <h2 id="upload-title" className="mb-4 text-xl font-bold">
+            <h2 id="upload-title" className="mb-4 font-display text-2xl font-bold">
               Upload a PDF
             </h2>
             <form onSubmit={uploadNewDocument} className="flex flex-col gap-4">
@@ -126,7 +122,7 @@ function DocumentsSection({ courseId }: { courseId: number }) {
                   name="file"
                   accept="application/pdf"
                   required
-                  className="rounded border px-3 py-2"
+                  className="input"
                 />
               </label>
               {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
@@ -134,14 +130,11 @@ function DocumentsSection({ courseId }: { courseId: number }) {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="rounded px-4 py-2 text-gray-600 hover:bg-gray-100"
+                  className="btn-secondary"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
-                >
+                <button type="submit" className="btn">
                   Upload
                 </button>
               </div>
