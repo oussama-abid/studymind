@@ -1,10 +1,9 @@
 from typing import Literal
 
-from google import genai
 from google.genai import types
 
-from backend.core.config import settings
 from backend.models import EMBEDDING_DIMENSIONS
+from backend.services.gemini import PATIENT_RETRIES, QUICK_RETRIES, create_client
 
 MODEL = "gemini-embedding-001"
 BATCH_SIZE = 100
@@ -17,17 +16,9 @@ def embed_texts(
     task_type: TaskType = "RETRIEVAL_DOCUMENT",
 ) -> list[list[float]]:
     """Turn each text into a vector of 768 numbers, in the same order."""
-    client = genai.Client(
-        api_key=settings.gemini_api_key,
-        http_options=types.HttpOptions(
-            retry_options=types.HttpRetryOptions(
-                attempts=5,  # 1 try + 4 retries
-                initial_delay=30,  # seconds before the first retry
-                max_delay=60,  # the free-tier quota resets every minute
-                http_status_codes=[429, 500, 503],
-            ),
-        ),
-    )
+    # Questions come from a waiting student; documents are embedded in the background
+    retries = QUICK_RETRIES if task_type == "RETRIEVAL_QUERY" else PATIENT_RETRIES
+    client = create_client(retries)
     vectors: list[list[float]] = []
 
     for start in range(0, len(texts), BATCH_SIZE):
