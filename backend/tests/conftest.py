@@ -40,11 +40,33 @@ def client(engine):
     app.dependency_overrides[get_session_factory] = lambda: TestSession
 
     with TestClient(app) as test_client:
+        # Every test is logged in as this user, unless it says otherwise
+        test_client.headers.update(log_in(test_client, "owner@example.com"))
         yield test_client
 
     # 5. After each test: undo the override and empty all tables
     app.dependency_overrides.clear()
     empty_tables(engine)
+
+
+def log_in(client, email: str) -> dict[str, str]:
+    """Register and log in a user; return the header that proves who they are."""
+    account = {"email": email, "password": "test-password"}
+    client.post("/auth/register", json=account)
+    token = client.post("/auth/login", json=account).json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def other_user(client):
+    """Headers of a second user, to check they can't reach the first one's data."""
+    return log_in(client, "other@example.com")
+
+
+@pytest.fixture
+def anonymous(client):
+    """Headers that remove the login, to check endpoints answer 401."""
+    return {"Authorization": ""}
 
 
 @pytest.fixture

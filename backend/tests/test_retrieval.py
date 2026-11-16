@@ -1,6 +1,13 @@
 import pytest
 
-from backend.models import EMBEDDING_DIMENSIONS, Chunk, Course, Document, DocumentStatus
+from backend.models import (
+    EMBEDDING_DIMENSIONS,
+    Chunk,
+    Course,
+    Document,
+    DocumentStatus,
+    User,
+)
 from backend.services.retrieval import SearchResult, search_chunks
 
 
@@ -44,8 +51,16 @@ def add_chunk(db, document, content, page_number, vector_index):
 
 
 @pytest.fixture
-def course(db):
-    course = Course(title="Docker")
+def owner(db):
+    user = User(email="owner@example.com", hashed_password="not-a-real-hash")
+    db.add(user)
+    db.flush()
+    return user
+
+
+@pytest.fixture
+def course(db, owner):
+    course = Course(title="Docker", owner_id=owner.id)
     db.add(course)
     db.flush()
     return course
@@ -65,8 +80,8 @@ def test_closest_chunk_comes_first(db, course, question_points_to):
     )
 
 
-def test_only_searches_the_given_course(db, course, question_points_to):
-    other_course = Course(title="Databases")
+def test_only_searches_the_given_course(db, course, owner, question_points_to):
+    other_course = Course(title="Databases", owner_id=owner.id)
     db.add(other_course)
     db.flush()
     add_chunk(db, add_document(db, course, "docker.pdf"), "Docker", 1, vector_index=1)

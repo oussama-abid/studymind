@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
 from sqlalchemy import select
 
+from backend.core.auth import CurrentUserDep
 from backend.core.config import settings
 from backend.core.database import SessionDep, SessionFactoryDep
 from backend.models import Document
@@ -32,9 +33,11 @@ def upload_document(
     db: SessionDep,
     background_tasks: BackgroundTasks,
     session_factory: SessionFactoryDep,
+    user: CurrentUserDep,
 ):
-    # 1. Check the course exists (404 otherwise)
-    get_course_or_404(db, course_id)
+
+    # 1. Check the course exists and is the user's  (404 otherwise)
+    get_course_or_404(db, course_id, user)
 
     # 2. Read the file (at most one byte over the limit) and validate it
     content = file.file.read(MAX_UPLOAD_BYTES + 1)
@@ -69,9 +72,9 @@ def upload_document(
 
 
 @router.get("", response_model=list[DocumentRead])
-def list_documents(course_id: int, db: SessionDep):
+def list_documents(course_id: int, db: SessionDep, user: CurrentUserDep):
     # 1. Check the course exists (404 otherwise)
-    get_course_or_404(db, course_id)
+    get_course_or_404(db, course_id, user)
 
     # 2. All documents of this course, newest first
     query = (

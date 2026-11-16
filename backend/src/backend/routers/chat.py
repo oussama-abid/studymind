@@ -3,6 +3,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 from google.genai.errors import APIError
 
+from backend.core.auth import CurrentUserDep
 from backend.core.database import SessionDep
 from backend.routers.courses import get_course_or_404
 from backend.schemas.chat import ChatRequest, ChatResponse, Source
@@ -14,9 +15,11 @@ router = APIRouter(prefix="/courses/{course_id}/chat", tags=["chat"])
 
 
 @router.post("", response_model=ChatResponse)
-def ask_question(course_id: int, request: ChatRequest, db: SessionDep):
+def ask_question(
+    course_id: int, request: ChatRequest, db: SessionDep, user: CurrentUserDep
+):
     # 1. The course must exist
-    get_course_or_404(db, course_id)
+    get_course_or_404(db, course_id, user)
 
     # 2. Without ready documents there is nothing to search: don't call Gemini
     if not has_ready_documents(db, course_id):

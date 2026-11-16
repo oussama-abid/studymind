@@ -66,8 +66,8 @@ def test_me_returns_the_logged_in_user(client):
     assert response.json()["email"] == EMAIL
 
 
-def test_me_without_token_returns_401(client):
-    assert client.get("/auth/me").status_code == 401
+def test_me_without_token_returns_401(client, anonymous):
+    assert client.get("/auth/me", headers=anonymous).status_code == 401
 
 
 def test_me_with_a_forged_token_returns_401(client):
