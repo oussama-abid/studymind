@@ -8,6 +8,7 @@ from backend.core.config import settings
 from backend.core.database import get_db, get_session_factory
 from backend.main import app
 from backend.models import EMBEDDING_DIMENSIONS, Base
+from backend.services.chat import GeminiAnswer
 
 
 @pytest.fixture(scope="session")
@@ -80,7 +81,9 @@ def db(engine):
 def empty_tables(engine):
     with engine.begin() as connection:
         connection.execute(
-            text("TRUNCATE users, courses, documents, chunks RESTART IDENTITY CASCADE")
+            text(
+                "TRUNCATE users, courses, documents, chunks, question_log RESTART IDENTITY CASCADE"
+            )
         )
 
 
@@ -142,3 +145,22 @@ def fake_embed_texts(texts: list[str]) -> list[list[float]]:
 @pytest.fixture(autouse=True)
 def fake_embeddings(monkeypatch):
     monkeypatch.setattr("backend.services.processing.embed_texts", fake_embed_texts)
+
+
+@pytest.fixture
+def fake_gemini(monkeypatch):
+    """Fake both Gemini calls; remember the prompt the chat sent."""
+    sent = {}
+
+    def fake_generate_answer(prompt):
+        sent["prompt"] = prompt
+        return GeminiAnswer(
+            found=sent.get("found", True), answer="Docker runs containers."
+        )
+
+    monkeypatch.setattr(
+        "backend.services.retrieval.embed_texts",
+        lambda texts, task_type: [[0.1] * EMBEDDING_DIMENSIONS],
+    )
+    monkeypatch.setattr("backend.services.chat.generate_answer", fake_generate_answer)
+    return sent

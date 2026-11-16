@@ -9,6 +9,7 @@ from backend.core.database import SessionDep, SessionFactoryDep
 from backend.models import Document
 from backend.routers.courses import get_course_or_404
 from backend.schemas.documents import DocumentRead
+from backend.services.limits import count_documents
 from backend.services.processing import process_document_in_background
 
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # 20 MB
@@ -39,11 +40,19 @@ def upload_document(
     # 1. Check the course exists and is the user's  (404 otherwise)
     get_course_or_404(db, course_id, user)
 
-    # 2. Read the file (at most one byte over the limit) and validate it
+    # 2. Each user can store a limited number of documents (Gemini quota)
+    limit = settings.max_documents_per_user
+    if count_documents(db, user.id) >= limit:
+        raise HTTPException(
+            status_code=400,
+            detail=f"You've reached the limit of {limit} documents.",
+        )
+
+    # 3. Read the file (at most one byte over the limit) and validate it
     content = file.file.read(MAX_UPLOAD_BYTES + 1)
     validate_pdf(content)
 
-    # 3. Create the row; flush() makes the database assign an id
+    # 4. Create the row; flush() makes the database assign an id
     document = Document(
         course_id=course_id,
         filename=file.filename or "document.pdf",
@@ -52,17 +61,17 @@ def upload_document(
     db.add(document)
     db.flush()
 
-    # 4. Save the file under a name we choose: <upload_dir>/<id>.pdf
+    # 5. Save the file under a name we choose: <upload_dir>/<id>.pdf
     upload_dir = Path(settings.upload_dir)
     upload_dir.mkdir(parents=True, exist_ok=True)
     file_path = upload_dir / f"{document.id}.pdf"
     file_path.write_bytes(content)
 
-    # 5. Store the path and save everything
+    # 6. Store the path and save everything
     document.path = str(file_path)
     db.commit()
 
-    # 6. Process the PDF after the response is sent (chunks + embeddings)
+    # 7. Process the PDF after the response is sent (chunks + embeddings)
     background_tasks.add_task(
         process_document_in_background, session_factory, document.id
     )

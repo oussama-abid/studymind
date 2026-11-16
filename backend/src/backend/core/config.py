@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     gemini_api_key: str
     jwt_secret_key: str
     access_token_minutes: int = 60
+    max_documents_per_user: int = 20
+    max_questions_per_hour: int = 30
     model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 
 

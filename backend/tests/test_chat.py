@@ -1,8 +1,6 @@
-import pytest
 from google.genai.errors import ServerError
 
-from backend.models import EMBEDDING_DIMENSIONS
-from backend.services.chat import GeminiAnswer, build_prompt, unique_pages
+from backend.services.chat import build_prompt, unique_pages
 from backend.services.retrieval import SearchResult
 
 # --- build_prompt and unique_pages: pure functions, no database, no Gemini ---
@@ -37,25 +35,6 @@ def test_unique_pages_keeps_each_page_once_in_order():
 
 
 # --- POST /courses/{id}/chat: the whole flow, with Gemini faked ---
-
-
-@pytest.fixture
-def fake_gemini(monkeypatch):
-    """Fake both Gemini calls; remember the prompt the chat sent."""
-    sent = {}
-
-    def fake_generate_answer(prompt):
-        sent["prompt"] = prompt
-        return GeminiAnswer(
-            found=sent.get("found", True), answer="Docker runs containers."
-        )
-
-    monkeypatch.setattr(
-        "backend.services.retrieval.embed_texts",
-        lambda texts, task_type: [[0.1] * EMBEDDING_DIMENSIONS],
-    )
-    monkeypatch.setattr("backend.services.chat.generate_answer", fake_generate_answer)
-    return sent
 
 
 def create_course(client):
