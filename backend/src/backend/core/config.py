@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     gemini_api_key: str
     model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
+    jwt_secret_key: str
+    access_token_minutes: int = 60
 
 
 settings = Settings()
