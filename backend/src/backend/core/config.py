@@ -13,7 +13,6 @@ class Settings(BaseSettings):
     jwt_secret_key: str
     access_token_minutes: int = 60
     model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
-    
 
 
 settings = Settings()
