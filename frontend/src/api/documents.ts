@@ -1,6 +1,5 @@
+import { apiFetch } from './auth'
 import { errorMessage } from './errors'
-
-const apiUrl = import.meta.env.VITE_API_URL
 
 export type CourseDocument = {
   id: number
@@ -18,7 +17,7 @@ export type DocumentCreate = {
 }
 
 export async function fetchDocuments(courseId: number): Promise<CourseDocument[]> {
-  const response = await fetch(`${apiUrl}/courses/${courseId}/documents`)
+  const response = await apiFetch(`/courses/${courseId}/documents`)
   if (!response.ok) {
     throw new Error(await errorMessage(response, `Upload failed (error ${response.status})`))
   }
@@ -29,7 +28,7 @@ export async function uploadDocument(upload: DocumentCreate): Promise<CourseDocu
   const formData = new FormData()
   formData.append('file', upload.file)
 
-  const response = await fetch(`${apiUrl}/courses/${upload.course_id}/documents`, {
+  const response = await apiFetch(`/courses/${upload.course_id}/documents`, {
     method: 'POST',
     body: formData,
   })

@@ -6,4 +6,5 @@ import { afterEach } from 'vitest'
 // Remove everything rendered by a test before the next test starts
 afterEach(() => {
   cleanup()
+  localStorage.clear() // each test starts logged out
 })

@@ -30,7 +30,17 @@ function CoursePage() {
 
       {status === 'loading' && <p className="mt-4 text-muted">Loading course...</p>}
 
-      {status === 'error' && <p className="mt-4 text-red-600">Could not load this course.</p>}
+      {status === 'error' && (
+        <div className="card mt-6">
+          <h1 className="font-display text-2xl font-bold">Course not found</h1>
+          <p className="mt-2 text-muted">
+            This course doesn't exist, or it belongs to another account.
+          </p>
+          <Link to="/" className="btn mt-4 inline-block">
+            Back to your courses
+          </Link>
+        </div>
+      )}
 
       {status === 'ready' && course && (
         <>

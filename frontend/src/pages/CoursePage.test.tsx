@@ -20,25 +20,29 @@ function renderAt(url: string) {
 }
 
 test('shows the course from the URL', async () => {
-  const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-    new Response(
-      JSON.stringify({
-        id: 1,
-        title: 'Databases',
-        description: null,
-        created_at: '',
-        updated_at: '',
-      }),
-    ),
+  // Answer each request by its URL: the page also loads the documents
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) =>
+    String(url).endsWith('/documents')
+      ? new Response(JSON.stringify([]))
+      : new Response(
+          JSON.stringify({
+            id: 1,
+            title: 'Databases',
+            description: null,
+            created_at: '',
+            updated_at: '',
+          }),
+        ),
   )
   renderAt('/courses/1')
   expect(await screen.findByText('Databases')).toBeInTheDocument()
-  expect(fetchMock).toHaveBeenCalledWith(expect.stringMatching(/\/courses\/1$/))
+  // The page asked the backend for course 1, the id from the URL
+  expect(String(fetchMock.mock.calls[0][0])).toMatch(/\/courses\/1$/)
 })
 
 test('shows an error when the course does not exist', async () => {
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('', { status: 404 }))
   vi.spyOn(console, 'error').mockImplementation(() => {})
   renderAt('/courses/999')
-  expect(await screen.findByText('Could not load this course.')).toBeInTheDocument()
+  expect(await screen.findByText('Course not found')).toBeInTheDocument()
 })
