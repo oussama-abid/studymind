@@ -1,6 +1,5 @@
+import { apiFetch } from './auth'
 import { errorMessage } from './errors'
-
-const apiUrl = import.meta.env.VITE_API_URL
 
 export type Source = {
   filename: string
@@ -13,7 +12,7 @@ export type ChatResponse = {
 }
 
 export async function askQuestion(courseId: number, question: string): Promise<ChatResponse> {
-  const response = await fetch(`${apiUrl}/courses/${courseId}/chat`, {
+  const response = await apiFetch(`/courses/${courseId}/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ question }),

@@ -1,4 +1,4 @@
-const apiUrl = import.meta.env.VITE_API_URL
+import { apiFetch } from './auth'
 
 export type Course = {
   id: number
@@ -14,7 +14,7 @@ export type CourseCreate = {
 }
 
 export async function fetchCourses(): Promise<Course[]> {
-  const response = await fetch(`${apiUrl}/courses`)
+  const response = await apiFetch(`/courses`)
   if (!response.ok) {
     throw new Error(`Error fetching courses: ${response.status}`)
   }
@@ -22,7 +22,7 @@ export async function fetchCourses(): Promise<Course[]> {
 }
 
 export async function createCourse(course: CourseCreate): Promise<Course> {
-  const response = await fetch(`${apiUrl}/courses`, {
+  const response = await apiFetch(`/courses`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(course),
@@ -33,7 +33,7 @@ export async function createCourse(course: CourseCreate): Promise<Course> {
   return (await response.json()) as Course
 }
 export async function fetchCourse(id: number): Promise<Course> {
-  const response = await fetch(`${apiUrl}/courses/${id}`)
+  const response = await apiFetch(`/courses/${id}`)
   if (!response.ok) {
     throw new Error(`Error fetching course ${id}: ${response.status}`)
   }
