@@ -58,7 +58,7 @@ def db(engine):
 def empty_tables(engine):
     with engine.begin() as connection:
         connection.execute(
-            text("TRUNCATE courses, documents, chunks RESTART IDENTITY CASCADE")
+            text("TRUNCATE users, courses, documents, chunks RESTART IDENTITY CASCADE")
         )
 
 
