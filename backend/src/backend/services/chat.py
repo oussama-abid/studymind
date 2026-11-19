@@ -95,11 +95,11 @@ def generate_answer(prompt: str) -> AiAnswer:
 
 
 def unique_pages(results: list[SearchResult]) -> list[SearchResult]:
-    """Keep one result per (file, page), in the original order."""
+    """Keep one result per (document, page), in the original order."""
     seen = set()
     unique = []
     for result in results:
-        key = (result.filename, result.page_number)
+        key = (result.document_id, result.page_number)
         if key not in seen:
             seen.add(key)
             unique.append(result)

@@ -3,6 +3,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class Source(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+    document_id: int
     filename: str
     page_number: int
 

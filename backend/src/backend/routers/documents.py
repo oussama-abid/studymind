@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from sqlalchemy import select
 
 from backend.core.auth import CurrentUserDep
@@ -92,3 +93,29 @@ def list_documents(course_id: int, db: SessionDep, user: CurrentUserDep):
         .order_by(Document.created_at.desc(), Document.id.desc())
     )
     return db.scalars(query).all()
+
+
+@router.get("/{document_id}/file")
+def download_document(
+    course_id: int, document_id: int, db: SessionDep, user: CurrentUserDep
+):
+    # 1. Check the course is yours (404 otherwise)
+    get_course_or_404(db, course_id, user)
+
+    # 2. The document must exist AND belong to this course; otherwise anyone
+    #    could read other users' files through their own course ID
+    document = db.get(Document, document_id)
+    if (
+        document is None
+        or document.course_id != course_id
+        or not Path(document.path).is_file()
+    ):
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    # 3. Send the file, shown in the browser instead of downloaded
+    return FileResponse(
+        document.path,
+        media_type="application/pdf",
+        filename=document.filename,
+        content_disposition_type="inline",
+    )

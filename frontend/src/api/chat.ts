@@ -2,6 +2,7 @@ import { apiFetch } from './auth'
 import { errorMessage } from './errors'
 
 export type Source = {
+  document_id: number
   filename: string
   page_number: number
 }
