@@ -4,11 +4,13 @@ import { Link, useParams } from 'react-router'
 import { type Course, fetchCourse } from '../api/courses'
 import ChatSection from '../components/ChatSection'
 import DocumentsSection from '../components/DocumentsSection'
+import { usePageTitle } from '../usePageTitle'
 
 function CoursePage() {
   const { courseId } = useParams()
   const [course, setCourse] = useState<Course | null>(null)
   const [status, setStatus] = useState<'loading' | 'error' | 'ready'>('loading')
+  usePageTitle(course?.title ?? 'Course')
 
   useEffect(() => {
     fetchCourse(Number(courseId))
@@ -23,7 +25,7 @@ function CoursePage() {
   }, [courseId])
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
       <Link to="/" className="text-sm text-action hover:underline">
         ← All courses
       </Link>
@@ -46,7 +48,7 @@ function CoursePage() {
         <>
           <h1 className="page-title mt-3">{course.title}</h1>
           {course.description && <p className="mt-2 text-lg text-muted">{course.description}</p>}
-          <div className="mt-10 grid gap-10 lg:grid-cols-[320px_1fr]">
+          <div className="mt-8 grid grid-cols-1 gap-10 lg:mt-10 lg:grid-cols-[320px_minmax(0,1fr)]">
             <DocumentsSection courseId={course.id} />
             <ChatSection courseId={course.id} />
           </div>

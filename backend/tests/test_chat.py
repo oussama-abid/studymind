@@ -10,8 +10,8 @@ from backend.services.retrieval import SearchResult
 
 def test_build_prompt_numbers_the_excerpts_and_ends_with_the_question():
     results = [
-        SearchResult("Docker runs containers.", "lecture1.pdf", 2),
-        SearchResult("Images are templates.", "lecture1.pdf", 5),
+        SearchResult("Docker runs containers.", "lecture1.pdf", 2, document_id=1),
+        SearchResult("Images are templates.", "lecture1.pdf", 5, document_id=1),
     ]
 
     prompt = build_prompt("What does Docker run?", results)
@@ -26,9 +26,9 @@ def test_build_prompt_numbers_the_excerpts_and_ends_with_the_question():
 
 def test_unique_pages_keeps_each_page_once_in_order():
     results = [
-        SearchResult("a", "lecture1.pdf", 2),
-        SearchResult("b", "lecture2.pdf", 1),
-        SearchResult("c", "lecture1.pdf", 2),  # same page as the first one
+        SearchResult("a", "lecture1.pdf", 2, document_id=1),
+        SearchResult("b", "lecture2.pdf", 1, document_id=2),
+        SearchResult("c", "lecture1.pdf", 2, document_id=1),  # same page as "a"
     ]
 
     pages = [(r.filename, r.page_number) for r in unique_pages(results)]
@@ -50,17 +50,18 @@ def ask(client, course_id, question="What does Docker run?"):
 def test_chat_answers_with_sources(client, make_pdf, fake_gemini):
     course_id = create_course(client)
     pdf = make_pdf(["Docker runs containers.", "Images are templates."])
-    client.post(
+    document_id = client.post(
         f"/courses/{course_id}/documents",
         files={"file": ("lecture1.pdf", pdf, "application/pdf")},
-    )
+    ).json()["id"]
 
     response = ask(client, course_id)
 
     assert response.status_code == 200
     body = response.json()
     assert body["answer"] == "Docker runs containers."
-    assert {"filename": "lecture1.pdf", "page_number": 1} in body["sources"]
+    source = {"document_id": document_id, "filename": "lecture1.pdf", "page_number": 1}
+    assert source in body["sources"]
     assert "Question: What does Docker run?" in fake_gemini["prompt"]
     assert "Docker runs containers." in fake_gemini["prompt"]
 

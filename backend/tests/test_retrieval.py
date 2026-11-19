@@ -76,7 +76,10 @@ def test_closest_chunk_comes_first(db, course, question_points_to):
     results = search_chunks(db, course.id, "What does Docker run?")
 
     assert results[0] == SearchResult(
-        content="Docker runs containers.", filename="lecture1.pdf", page_number=2
+        content="Docker runs containers.",
+        filename="lecture1.pdf",
+        page_number=2,
+        document_id=document.id,
     )
 
 

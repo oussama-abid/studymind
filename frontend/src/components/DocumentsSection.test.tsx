@@ -1,7 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 
 import { type CourseDocument } from '../api/documents'
+import ToastProvider from '../toast/ToastProvider'
 import DocumentsSection from './DocumentsSection'
 
 afterEach(() => {
@@ -122,4 +123,50 @@ test('refreshes the status while a document is processing', async () => {
   await vi.advanceTimersByTimeAsync(3000)
 
   expect(await screen.findByText('ready')).toBeInTheDocument()
+})
+
+test('shows a notification when a document becomes ready', async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true })
+  vi.spyOn(globalThis, 'fetch')
+    .mockResolvedValueOnce(json([makeDocument({ filename: 'lecture1.pdf', status: 'processing' })]))
+    .mockResolvedValueOnce(json([makeDocument({ filename: 'lecture1.pdf', status: 'ready' })]))
+  render(
+    <ToastProvider>
+      <DocumentsSection courseId={1} />
+    </ToastProvider>,
+  )
+  expect(await screen.findByText('processing')).toBeInTheDocument()
+
+  await vi.advanceTimersByTimeAsync(3000)
+
+  const toast = await screen.findByText(
+    'lecture1.pdf is ready. You can ask questions about it now.',
+  )
+  expect(toast).toBeInTheDocument()
+
+  // It can be closed by hand...
+  fireEvent.click(screen.getByRole('button', { name: 'Close notification' }))
+  expect(toast).not.toBeInTheDocument()
+})
+
+test('notifications disappear by themselves', async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true })
+  vi.spyOn(globalThis, 'fetch')
+    .mockResolvedValueOnce(json([makeDocument({ filename: 'lecture1.pdf', status: 'processing' })]))
+    .mockResolvedValueOnce(json([makeDocument({ filename: 'lecture1.pdf', status: 'failed' })]))
+  render(
+    <ToastProvider>
+      <DocumentsSection courseId={1} />
+    </ToastProvider>,
+  )
+  expect(await screen.findByText('processing')).toBeInTheDocument()
+  await vi.advanceTimersByTimeAsync(3000)
+  expect(await screen.findByText('lecture1.pdf could not be read.')).toBeInTheDocument()
+
+  // ...or after 5 seconds
+  await vi.advanceTimersByTimeAsync(5000)
+
+  await waitFor(() =>
+    expect(screen.queryByText('lecture1.pdf could not be read.')).not.toBeInTheDocument(),
+  )
 })

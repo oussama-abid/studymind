@@ -39,3 +39,13 @@ export async function uploadDocument(upload: DocumentCreate): Promise<CourseDocu
   }
   return (await response.json()) as CourseDocument
 }
+
+export async function fetchDocumentFile(courseId: number, documentId: number): Promise<Blob> {
+  const response = await apiFetch(`/courses/${courseId}/documents/${documentId}/file`)
+  if (!response.ok) {
+    throw new Error(
+      await errorMessage(response, `Could not open the PDF (error ${response.status})`),
+    )
+  }
+  return await response.blob()
+}

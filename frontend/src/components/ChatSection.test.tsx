@@ -20,7 +20,7 @@ test('sends the question and shows the answer with its sources', async () => {
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
     json({
       answer: 'Docker runs **containers**.',
-      sources: [{ filename: 'lecture1.pdf', page_number: 2 }],
+      sources: [{ document_id: 7, filename: 'lecture1.pdf', page_number: 2 }],
     }),
   )
   render(<ChatSection courseId={3} />)
@@ -82,4 +82,59 @@ test('does not render HTML from the answer', async () => {
 
   await screen.findByText(/Hello/)
   expect(container.querySelector('img')).toBeNull()
+})
+
+test('opens a source in the PDF panel at the cited page', async () => {
+  URL.createObjectURL = vi.fn(() => 'blob:lecture1') // jsdom has no real blob URLs
+  URL.revokeObjectURL = vi.fn()
+  const fetchMock = vi
+    .spyOn(globalThis, 'fetch')
+    .mockResolvedValueOnce(
+      json({
+        answer: 'Docker runs containers.',
+        sources: [{ document_id: 7, filename: 'lecture1.pdf', page_number: 2 }],
+      }),
+    )
+    .mockResolvedValueOnce(new Response('%PDF-1.4'))
+  render(<ChatSection courseId={3} />)
+  ask('What does Docker run?')
+
+  fireEvent.click(await screen.findByRole('button', { name: 'lecture1.pdf, page 2' }))
+
+  // The right file was downloaded, and the viewer opens it at page 2
+  expect(String(fetchMock.mock.calls[1][0])).toMatch(/\/courses\/3\/documents\/7\/file$/)
+  const viewer = await screen.findByTitle('lecture1.pdf, page 2')
+  expect(viewer).toHaveAttribute('src', 'blob:lecture1#page=2')
+
+  // Closing removes the panel and frees the memory
+  fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:lecture1')
+})
+
+test('asks an example question with one click', async () => {
+  const fetchMock = vi
+    .spyOn(globalThis, 'fetch')
+    .mockResolvedValue(json({ answer: 'Images and containers.', sources: [] }))
+  render(<ChatSection courseId={3} />)
+
+  fireEvent.click(
+    screen.getByRole('button', { name: 'What are the most important terms in this course?' }),
+  )
+
+  expect(await screen.findByText('Images and containers.')).toBeInTheDocument()
+  expect(fetchMock.mock.calls[0][1]?.body).toBe(
+    JSON.stringify({ question: 'What are the most important terms in this course?' }),
+  )
+  // The examples are only for an empty chat
+  expect(screen.queryByText(/Not sure where to start/)).not.toBeInTheDocument()
+})
+
+test('explains what to do when the server cannot be reached', async () => {
+  vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'))
+  render(<ChatSection courseId={3} />)
+
+  ask('Anything?')
+
+  expect(await screen.findByRole('alert')).toHaveTextContent(/Check your internet connection/)
 })

@@ -71,3 +71,17 @@ test('creates a new course', async () => {
   expect(screen.getByText('SQL basics')).toBeInTheDocument()
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 })
+
+test('shows when each course was last changed', async () => {
+  mockCourses([
+    {
+      id: 1,
+      title: 'Databases',
+      description: null,
+      created_at: '2026-11-01T10:00:00Z',
+      updated_at: '2026-11-19T10:00:00Z',
+    },
+  ])
+  renderPage()
+  expect(await screen.findByText(/^Changed /)).toBeInTheDocument()
+})
