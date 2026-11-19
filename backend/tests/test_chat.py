@@ -1,4 +1,6 @@
+import httpx
 from google.genai.errors import ServerError
+from groq import APIConnectionError
 
 from backend.services.chat import build_prompt, unique_pages
 from backend.services.retrieval import SearchResult
@@ -101,13 +103,32 @@ def test_chat_with_empty_question_returns_422(client, fake_gemini):
     assert response.status_code == 422
 
 
-def test_chat_returns_503_when_gemini_is_unavailable(
+def test_chat_returns_503_when_the_model_is_unavailable(
     client, make_pdf, fake_gemini, monkeypatch
 ):
     def broken_generate_answer(prompt):
-        raise ServerError(503, {"error": {"message": "Service unavailable"}})
+        raise APIConnectionError(request=httpx.Request("POST", "https://api.groq.com"))
 
     monkeypatch.setattr("backend.services.chat.generate_answer", broken_generate_answer)
+    course_id = create_course(client)
+    client.post(
+        f"/courses/{course_id}/documents",
+        files={"file": ("lecture1.pdf", make_pdf(["Docker."]), "application/pdf")},
+    )
+
+    response = ask(client, course_id)
+
+    assert response.status_code == 503
+    assert "try again" in response.json()["detail"]
+
+
+def test_chat_returns_503_when_embedding_the_question_fails(
+    client, make_pdf, fake_gemini, monkeypatch
+):
+    def broken_embed_texts(texts, task_type):
+        raise ServerError(503, {"error": {"message": "Service unavailable"}})
+
+    monkeypatch.setattr("backend.services.retrieval.embed_texts", broken_embed_texts)
     course_id = create_course(client)
     client.post(
         f"/courses/{course_id}/documents",

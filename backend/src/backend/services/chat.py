@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 
-from google.genai import types
-from pydantic import BaseModel
+from groq import Groq
+from pydantic import BaseModel, ConfigDict, ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.core.config import settings
 from backend.models import Document, DocumentStatus
-from backend.services.gemini import QUICK_RETRIES, create_client
 from backend.services.retrieval import SearchResult, search_chunks
 
-CHAT_MODEL = "gemini-3.5-flash"
+CHAT_MODEL = "openai/gpt-oss-120b"
 
 NOT_FOUND_ANSWER = "I couldn't find this in your course documents."
 
@@ -34,9 +34,10 @@ Rules:
 """
 
 
-class GeminiAnswer(BaseModel):
-    """The JSON shape Gemini must reply with."""
+class AiAnswer(BaseModel):
+    """The JSON shape the model must reply with."""
 
+    model_config = ConfigDict(extra="forbid")
     found: bool
     answer: str
 
@@ -55,7 +56,7 @@ def has_ready_documents(db: Session, course_id: int) -> bool:
 
 
 def build_prompt(question: str, results: list[SearchResult]) -> str:
-    """Turn the question and the found excerpts into the text we send to Gemini."""
+    """Turn the question and the found excerpts into the text we send to the model."""
     blocks = []
     for number, result in enumerate(results, start=1):
         header = f"[{number}] ({result.filename}, page {result.page_number})"
@@ -65,27 +66,32 @@ def build_prompt(question: str, results: list[SearchResult]) -> str:
     return f"Excerpts from the course documents:\n\n{excerpts}\n\nQuestion: {question}"
 
 
-def generate_answer(prompt: str) -> GeminiAnswer:
-    client = create_client(QUICK_RETRIES, timeout_seconds=30)
-    response = client.models.generate_content(
+def generate_answer(prompt: str) -> AiAnswer:
+    client = Groq(api_key=settings.groq_api_key, timeout=30, max_retries=1)
+    response = client.chat.completions.create(
         model=CHAT_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_INSTRUCTION,
-            temperature=0.2,  # low = sticks closely to the excerpts
-            # Reading excerpts is easy: little thinking = much faster answers
-            thinking_config=types.ThinkingConfig(
-                thinking_level=types.ThinkingLevel.LOW
-            ),
-            # Reply as JSON in the shape of GeminiAnswer, not as free text
-            response_mime_type="application/json",
-            response_schema=GeminiAnswer,
-        ),
+        messages=[
+            {"role": "system", "content": SYSTEM_INSTRUCTION},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.2,
+        reasoning_effort="low",
+        # Reply as JSON in the shape of AiAnswer, not as free text
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "answer",
+                "strict": True,
+                "schema": AiAnswer.model_json_schema(),
+            },
+        },
     )
-    if isinstance(response.parsed, GeminiAnswer):
-        return response.parsed
-    # Rare: blocked or malformed reply. Treat it as "not found".
-    return GeminiAnswer(found=False, answer=NOT_FOUND_ANSWER)
+    text = response.choices[0].message.content or ""
+    try:
+        return AiAnswer.model_validate_json(text)
+    except ValidationError:
+        # Rare: malformed reply. Treat it as "not found".
+        return AiAnswer(found=False, answer=NOT_FOUND_ANSWER)
 
 
 def unique_pages(results: list[SearchResult]) -> list[SearchResult]:

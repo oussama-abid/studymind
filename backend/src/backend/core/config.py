@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     cors_origins: list[str]
     upload_dir: str = "uploads"
     gemini_api_key: str
+    groq_api_key: str
     jwt_secret_key: str
     access_token_minutes: int = 60
     max_documents_per_user: int = 20
