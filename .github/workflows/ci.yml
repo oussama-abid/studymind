@@ -40,8 +40,8 @@ jobs:
       - run: npm test
       - run: npm run build
   publish:
-    needs: [backend, frontend]    
-    if: github.event_name == 'push'   
+    needs: [backend, frontend]
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -54,12 +54,31 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: build and push 
+      - name: build and push
         uses: docker/build-push-action@v7
         with:
           push: true
           context: ./backend
           tags: ghcr.io/oussama-abid/studymind-backend:latest
-         
-    
-
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Set up SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Deploy
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" \
+            "cd ~/studymind && docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d --no-build && docker image prune -f"
