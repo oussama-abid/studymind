@@ -41,6 +41,8 @@ test('sends visitors who are not logged in to the login page', async () => {
   renderApp('/')
 
   expect(await screen.findByText('Welcome back')).toBeInTheDocument()
+  // Visitors see what StudyMind does before they log in
+  expect(screen.getByText('Check every answer')).toBeInTheDocument()
 })
 
 test('logs in and shows the courses with the user email', async () => {

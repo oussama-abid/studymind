@@ -46,7 +46,7 @@ function PdfViewer({ courseId, source, onClose }: PdfViewerProps) {
     <aside
       role="dialog"
       aria-label={label}
-      className="fixed inset-y-0 right-0 z-40 flex w-full max-w-2xl flex-col border-l border-line bg-white shadow-xl"
+      className="fixed inset-y-0 right-0 z-40 flex w-full max-w-2xl animate-slide-in flex-col border-l border-line bg-white shadow-2xl"
     >
       <header className="flex items-center justify-between gap-4 border-b border-line px-4 py-3">
         <p className="truncate font-bold">{label}</p>

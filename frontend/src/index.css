@@ -13,14 +13,45 @@
   --color-line: #dde2e8; /* borders, dividers */
   --color-action: #1f4fd1; /* buttons and links */
   --color-marker: #ffe45c; /* the highlighter */
+
+  /* Motion: short and calm. Each animation explains a change on the screen */
+  --animate-enter: enter 280ms ease-out both; /* new answers, toasts */
+  --animate-slide-in: slide-in 260ms ease-out both; /* the PDF panel */
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+}
+
+@layer base {
+  /* A clear focus ring for keyboard users, on every interactive element */
+  :focus-visible {
+    outline: 3px solid var(--color-action);
+    outline-offset: 2px;
+  }
 }
 
 @layer components {
   .btn {
-    @apply min-h-11 rounded-lg bg-action px-5 py-2 font-bold text-white hover:bg-ink disabled:opacity-50;
+    @apply min-h-11 rounded-lg bg-action px-5 py-2 font-bold text-white transition-colors duration-150 hover:bg-ink active:translate-y-px disabled:opacity-50 disabled:hover:bg-action;
   }
   .btn-secondary {
-    @apply min-h-11 rounded-lg border-2 border-ink bg-white px-4 py-2 font-bold text-ink hover:bg-paper;
+    @apply min-h-11 rounded-lg border-2 border-ink bg-white px-4 py-2 font-bold text-ink transition-colors duration-150 hover:bg-paper active:translate-y-px;
   }
   .card {
     @apply rounded-xl border border-line bg-white p-5;
@@ -29,7 +60,7 @@
     @apply rounded-lg border-2 border-ink bg-white px-3 py-2;
   }
   .page-title {
-    @apply font-display text-4xl font-extrabold tracking-tight text-ink;
+    @apply font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl;
   }
 }
 
@@ -43,4 +74,53 @@
     transparent 90%
   );
   padding: 0 2px;
+}
+
+/* The highlighter, for words outside answers (e.g. on the login page) */
+.marker {
+  background: linear-gradient(
+    transparent 40%,
+    var(--color-marker) 40%,
+    var(--color-marker) 90%,
+    transparent 90%
+  );
+  padding: 0 2px;
+}
+
+/* "StudyMind is thinking": three dots that light up one after another */
+.thinking-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: thinking 1.2s ease-in-out infinite both;
+}
+.thinking-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.thinking-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes thinking {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+/* People who turn off animations in their system get none */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

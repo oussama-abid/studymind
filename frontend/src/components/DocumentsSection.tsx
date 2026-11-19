@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { type CourseDocument, fetchDocuments, uploadDocument } from '../api/documents'
+import { useToast } from '../toast/ToastContext'
 
 const statusColors = {
   processing: 'bg-yellow-100 text-yellow-800',
@@ -13,12 +14,16 @@ function DocumentsSection({ courseId }: { courseId: number }) {
   const [status, setStatus] = useState<'loading' | 'error' | 'ready'>('loading')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const { showToast } = useToast()
+  // The last status we showed for each document, to notice when one changes
+  const knownStatus = useRef(new Map<number, CourseDocument['status']>())
 
   const hasProcessing = documents.some((doc) => doc.status === 'processing')
 
   useEffect(() => {
     fetchDocuments(courseId)
       .then((data) => {
+        knownStatus.current = new Map(data.map((doc) => [doc.id, doc.status]))
         setDocuments(data)
         setStatus('ready')
       })
@@ -34,6 +39,16 @@ function DocumentsSection({ courseId }: { courseId: number }) {
     const interval = setInterval(() => {
       fetchDocuments(courseId)
         .then((data) => {
+          // Tell the user when a document has finished processing
+          for (const doc of data) {
+            if (knownStatus.current.get(doc.id) !== 'processing') continue
+            if (doc.status === 'ready') {
+              showToast(`${doc.filename} is ready. You can ask questions about it now.`)
+            } else if (doc.status === 'failed') {
+              showToast(`${doc.filename} could not be read.`, 'error')
+            }
+          }
+          knownStatus.current = new Map(data.map((doc) => [doc.id, doc.status]))
           setDocuments(data)
         })
         .catch((error) => {
@@ -42,7 +57,7 @@ function DocumentsSection({ courseId }: { courseId: number }) {
     }, 3000)
 
     return () => clearInterval(interval)
-  }, [courseId, hasProcessing])
+  }, [courseId, hasProcessing, showToast])
 
   function openModal() {
     setUploadError(null)
@@ -56,8 +71,10 @@ function DocumentsSection({ courseId }: { courseId: number }) {
 
     try {
       const newDocument = await uploadDocument({ course_id: courseId, file })
+      knownStatus.current.set(newDocument.id, newDocument.status)
       setDocuments((currentDocuments) => [newDocument, ...currentDocuments])
       setIsModalOpen(false)
+      showToast(`${newDocument.filename} uploaded. StudyMind is reading it now.`)
     } catch (error) {
       console.error('Error uploading document:', error)
       setUploadError(error instanceof Error ? error.message : 'Upload failed.')
@@ -86,12 +103,18 @@ function DocumentsSection({ courseId }: { courseId: number }) {
       {status === 'ready' && documents.length > 0 && (
         <ul className="flex flex-col">
           {documents.map((doc) => (
-            <li key={doc.id} className="border-b border-line py-3">
+            <li key={doc.id} className="animate-enter border-b border-line py-3">
               <div className="flex items-center justify-between gap-4">
                 <p className="truncate font-semibold">{doc.filename}</p>
                 <span
-                  className={`rounded-full px-2 py-1 text-xs font-semibold ${statusColors[doc.status]}`}
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 text-xs font-semibold transition-colors duration-500 ${statusColors[doc.status]}`}
                 >
+                  {doc.status === 'processing' && (
+                    <span
+                      aria-hidden="true"
+                      className="size-1.5 animate-pulse rounded-full bg-current"
+                    />
+                  )}
                   {doc.status}
                 </span>
               </div>
@@ -109,7 +132,7 @@ function DocumentsSection({ courseId }: { courseId: number }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="upload-title"
-            className="card w-full max-w-md"
+            className="card w-full max-w-md animate-enter"
           >
             <h2 id="upload-title" className="mb-4 font-display text-2xl font-bold">
               Upload a PDF

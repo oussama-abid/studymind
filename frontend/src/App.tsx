@@ -11,15 +11,15 @@ function App() {
 
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <header className="flex items-center justify-between gap-4 border-b border-line bg-white px-8 py-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line bg-white px-4 py-3 sm:px-8 sm:py-4">
         <Link to="/" className="font-display text-2xl font-extrabold tracking-tight">
           StudyMind
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <BackendStatus />
           {user && (
             <>
-              <span className="text-sm text-muted">{user.email}</span>
+              <span className="hidden text-sm text-muted sm:inline">{user.email}</span>
               <button type="button" onClick={logOut} className="btn-secondary">
                 Log out
               </button>
