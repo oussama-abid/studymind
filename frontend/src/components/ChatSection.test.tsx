@@ -111,3 +111,30 @@ test('opens a source in the PDF panel at the cited page', async () => {
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:lecture1')
 })
+
+test('asks an example question with one click', async () => {
+  const fetchMock = vi
+    .spyOn(globalThis, 'fetch')
+    .mockResolvedValue(json({ answer: 'Images and containers.', sources: [] }))
+  render(<ChatSection courseId={3} />)
+
+  fireEvent.click(
+    screen.getByRole('button', { name: 'What are the most important terms in this course?' }),
+  )
+
+  expect(await screen.findByText('Images and containers.')).toBeInTheDocument()
+  expect(fetchMock.mock.calls[0][1]?.body).toBe(
+    JSON.stringify({ question: 'What are the most important terms in this course?' }),
+  )
+  // The examples are only for an empty chat
+  expect(screen.queryByText(/Not sure where to start/)).not.toBeInTheDocument()
+})
+
+test('explains what to do when the server cannot be reached', async () => {
+  vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'))
+  render(<ChatSection courseId={3} />)
+
+  ask('Anything?')
+
+  expect(await screen.findByRole('alert')).toHaveTextContent(/Check your internet connection/)
+})
