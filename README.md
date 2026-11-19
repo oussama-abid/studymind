@@ -9,6 +9,8 @@ StudyMind answers **only from their own documents** and shows the
 **Live demo:** https://studymind-neon.vercel.app
 (create an account; limits: 20 documents per user, 30 questions per hour)
 
+**API docs:** https://studymind-oussama.denmarkeast.cloudapp.azure.com/docs
+
 ![StudyMind answering a question with page sources](docs/screenshot.png)
 
 ## Features
