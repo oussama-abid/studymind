@@ -40,8 +40,8 @@ jobs:
       - run: npm test
       - run: npm run build
   publish:
-    needs: [backend, frontend]    
-    if: github.event_name == 'push'   
+    needs: [backend, frontend]
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -54,7 +54,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: build and push 
+      - name: build and push
         uses: docker/build-push-action@v7
         with:
           push: true
@@ -64,7 +64,7 @@ jobs:
     needs: publish
     runs-on: ubuntu-latest
     permissions:
-     contents: read
+      contents: read
     steps:
       - name: Set up SSH
         env:
@@ -82,16 +82,3 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" \
             "cd ~/studymind && docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d --no-build && docker image prune -f"
-      
-        
-         
-    
-    
-
-
-
-
-
-         
-    
-

@@ -131,6 +131,11 @@ docker compose -f docker-compose.prod.yml ps
 
 Check: https://studymind-oussama.denmarkeast.cloudapp.azure.com/docs
 
+After every merge to `main`, the `deploy` job in `.github/workflows/ci.yml`
+runs `pull` and `up -d` automatically. Run these commands by hand only after
+changing `.env`, `docker-compose.prod.yml` or `Caddyfile` (copy changed files
+with `scp` first).
+
 ## Troubleshooting
 
 | Symptom | Meaning | Check |
@@ -149,7 +154,4 @@ credit covers the rest. To delete everything at once:
 az group delete --name studymind-rg
 ```
 
-After every merge to `main`, the `deploy` job in `.github/workflows/ci.yml`
-runs `pull` and `up -d` automatically. Run these commands by hand only after
-changing `.env`, `docker-compose.prod.yml` or `Caddyfile` (copy changed files
-with `scp` first).
+
