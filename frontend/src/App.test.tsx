@@ -55,7 +55,8 @@ test('logs in and shows the courses with the user email', async () => {
   fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'secret-password' } })
   fireEvent.click(screen.getByRole('button', { name: 'Log in' }))
 
-  expect(await screen.findByText('My courses')).toBeInTheDocument()
+  expect(await screen.findByText('No courses yet. Create your first one!')).toBeInTheDocument()
+  expect(screen.getByText('My courses')).toBeInTheDocument()
   expect(screen.getByText(USER.email)).toBeInTheDocument()
   expect(getToken()).toBe('token-123')
   // Requests after login carry the token
