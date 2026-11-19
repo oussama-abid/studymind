@@ -12,6 +12,7 @@ class SearchResult:
     content: str
     filename: str
     page_number: int
+    document_id: int
 
 
 def search_chunks(
@@ -34,6 +35,7 @@ def search_chunks(
             content=chunk.content,
             filename=filename,
             page_number=chunk.page_number,
+            document_id=chunk.document_id,
         )
         for chunk, filename in db.execute(query).all()
     ]

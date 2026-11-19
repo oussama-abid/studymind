@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Markdown from 'react-markdown'
-
+import PdfViewer from './PdfViewer'
 import { askQuestion, type Source } from '../api/chat'
 
 type ChatEntry = {
@@ -13,6 +13,7 @@ type ChatEntry = {
 
 function ChatSection({ courseId }: { courseId: number }) {
   const [entries, setEntries] = useState<ChatEntry[]>([])
+  const [openSource, setOpenSource] = useState<Source | null>(null)
   const isAsking = entries.some((entry) => entry.answer === null && entry.error === null)
 
   // Change one entry (found by id) and keep all the others as they are
@@ -64,12 +65,19 @@ function ChatSection({ courseId }: { courseId: number }) {
                     <Markdown>{entry.answer}</Markdown>
                   </div>
                   {entry.sources.length > 0 && (
-                    <p className="mt-4 border-t border-dashed border-line pt-3 text-sm text-muted">
-                      Sources:{' '}
-                      {entry.sources
-                        .map((source) => `${source.filename}, page ${source.page_number}`)
-                        .join(' · ')}
-                    </p>
+                    <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-dashed border-line pt-3 text-sm text-muted">
+                      <span>Sources:</span>
+                      {entry.sources.map((source) => (
+                        <button
+                          key={`${source.document_id}-${source.page_number}`}
+                          type="button"
+                          onClick={() => setOpenSource(source)}
+                          className="rounded-md bg-paper px-2.5 py-1 font-bold text-action hover:underline"
+                        >
+                          {`${source.filename}, page ${source.page_number}`}
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </>
               )}
@@ -96,6 +104,14 @@ function ChatSection({ courseId }: { courseId: number }) {
           Ask
         </button>
       </form>
+      {openSource && (
+        <PdfViewer
+          key={openSource.document_id}
+          courseId={courseId}
+          source={openSource}
+          onClose={() => setOpenSource(null)}
+        />
+      )}
     </section>
   )
 }

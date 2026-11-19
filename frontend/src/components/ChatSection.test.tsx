@@ -20,7 +20,7 @@ test('sends the question and shows the answer with its sources', async () => {
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
     json({
       answer: 'Docker runs **containers**.',
-      sources: [{ filename: 'lecture1.pdf', page_number: 2 }],
+      sources: [{ document_id: 7, filename: 'lecture1.pdf', page_number: 2 }],
     }),
   )
   render(<ChatSection courseId={3} />)
@@ -82,4 +82,32 @@ test('does not render HTML from the answer', async () => {
 
   await screen.findByText(/Hello/)
   expect(container.querySelector('img')).toBeNull()
+})
+
+test('opens a source in the PDF panel at the cited page', async () => {
+  URL.createObjectURL = vi.fn(() => 'blob:lecture1') // jsdom has no real blob URLs
+  URL.revokeObjectURL = vi.fn()
+  const fetchMock = vi
+    .spyOn(globalThis, 'fetch')
+    .mockResolvedValueOnce(
+      json({
+        answer: 'Docker runs containers.',
+        sources: [{ document_id: 7, filename: 'lecture1.pdf', page_number: 2 }],
+      }),
+    )
+    .mockResolvedValueOnce(new Response('%PDF-1.4'))
+  render(<ChatSection courseId={3} />)
+  ask('What does Docker run?')
+
+  fireEvent.click(await screen.findByRole('button', { name: 'lecture1.pdf, page 2' }))
+
+  // The right file was downloaded, and the viewer opens it at page 2
+  expect(String(fetchMock.mock.calls[1][0])).toMatch(/\/courses\/3\/documents\/7\/file$/)
+  const viewer = await screen.findByTitle('lecture1.pdf, page 2')
+  expect(viewer).toHaveAttribute('src', 'blob:lecture1#page=2')
+
+  // Closing removes the panel and frees the memory
+  fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:lecture1')
 })

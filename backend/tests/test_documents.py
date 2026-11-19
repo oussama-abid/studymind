@@ -162,3 +162,44 @@ def test_list_documents_for_missing_course_returns_404(client):
     response = client.get("/courses/999/documents")
 
     assert response.status_code == 404
+
+
+def test_download_pdf(client, make_pdf):
+    course_id = create_course(client)
+    pdf = make_pdf(["Docker runs containers."])
+    document_id = upload(client, course_id, pdf).json()["id"]
+
+    response = client.get(f"/courses/{course_id}/documents/{document_id}/file")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.content == pdf
+
+
+def test_download_missing_document_returns_404(client):
+    course_id = create_course(client)
+
+    response = client.get(f"/courses/{course_id}/documents/999/file")
+
+    assert response.status_code == 404
+
+
+def test_download_document_from_another_course_returns_404(client, make_pdf):
+    course_id = create_course(client)
+    other_course_id = create_course(client)
+    document_id = upload(client, other_course_id, make_pdf(["Docker."])).json()["id"]
+
+    # Your own course in the URL, but the document is in your other course
+    response = client.get(f"/courses/{course_id}/documents/{document_id}/file")
+
+    assert response.status_code == 404
+
+
+def test_download_returns_404_when_the_file_is_missing(client, upload_dir, make_pdf):
+    course_id = create_course(client)
+    document_id = upload(client, course_id, make_pdf(["Docker."])).json()["id"]
+    (upload_dir / f"{document_id}.pdf").unlink()  # the file is gone from the disk
+
+    response = client.get(f"/courses/{course_id}/documents/{document_id}/file")
+
+    assert response.status_code == 404

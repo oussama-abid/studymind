@@ -49,6 +49,18 @@ def test_other_users_documents_and_chat_are_not_found(
     assert documents.status_code == upload.status_code == chat.status_code == 404
 
 
+def test_other_users_pdf_is_not_found(client, course_id, other_user, make_pdf):
+    pdf = make_pdf(["Docker runs containers."])
+    document_id = client.post(
+        f"/courses/{course_id}/documents",
+        files={"file": ("lecture.pdf", pdf, "application/pdf")},
+    ).json()["id"]
+
+    url = f"/courses/{course_id}/documents/{document_id}/file"
+
+    assert client.get(url, headers=other_user).status_code == 404
+
+
 def test_other_users_course_looks_exactly_like_a_missing_one(
     client, course_id, other_user
 ):
@@ -69,6 +81,7 @@ def test_other_users_course_looks_exactly_like_a_missing_one(
         ("delete", "/courses/1"),
         ("get", "/courses/1/documents"),
         ("post", "/courses/1/documents"),
+        ("get", "/courses/1/documents/1/file"),
         ("post", "/courses/1/chat"),
     ],
 )
