@@ -8,7 +8,7 @@ from backend.core.config import settings
 from backend.core.database import get_db, get_session_factory
 from backend.main import app
 from backend.models import EMBEDDING_DIMENSIONS, Base
-from backend.services.chat import GeminiAnswer
+from backend.services.chat import AiAnswer
 
 
 @pytest.fixture(scope="session")
@@ -154,9 +154,7 @@ def fake_gemini(monkeypatch):
 
     def fake_generate_answer(prompt):
         sent["prompt"] = prompt
-        return GeminiAnswer(
-            found=sent.get("found", True), answer="Docker runs containers."
-        )
+        return AiAnswer(found=sent.get("found", True), answer="Docker runs containers.")
 
     monkeypatch.setattr(
         "backend.services.retrieval.embed_texts",
